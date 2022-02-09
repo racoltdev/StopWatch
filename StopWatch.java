@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,15 +44,11 @@ public class StopWatch {
 		if (jobs.isEmpty()) {
 			System.out.println("There are no active jobs. Use \"(c)reate\" to create a new job");
 		}
-		else {
-			System.out.println("Active jobs:" + jobs);
-		}
-		
-		System.out.println("General Menu:");
 		
 		String input = "";
 		while (true) {
-			System.out.println("(c)reate, (r)emove, (u)se {job name}, (e)xit");
+			System.out.println("\nActive jobs:" + jobs);
+			System.out.println("General Menu:\n(c)reate {job name}, (r)emove {job name}, (u)se {job name}, (e)xit");
 			
 			input = sysIn.nextLine().toLowerCase();
 			
@@ -103,6 +100,8 @@ public class StopWatch {
 		else {
 			job = input.split(" ")[1];
 		}
+		
+		job = job.toLowerCase();
 		
 		while (job.isEmpty() || jobs.contains(job)) {
 			
@@ -171,9 +170,7 @@ public class StopWatch {
 		Date startDate = new Date(System.currentTimeMillis());
 		logTime(startDate, job, formatter);
 
-		Date stopDate;
-		//Scanner in = new Scanner(System.in);
-		
+		Date stopDate;		
 		System.out.println("Type \"Stop\" to stop clocking time for " + job.getName());
 		
 		while(!sysIn.nextLine().toLowerCase().equals("stop")) {
@@ -182,14 +179,13 @@ public class StopWatch {
 		stopDate = new Date(System.currentTimeMillis());
 		logTime(stopDate, job, formatter);
 		
-		SimpleDateFormat elapsedFormatter = new SimpleDateFormat("HH:mm:ss '\n'");
+		SimpleDateFormat elapsedFormatter = new SimpleDateFormat("HH:mm:ss'\n'");
+		elapsedFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
 	    long elapsedTime = stopDate.getTime() - startDate.getTime();
 	    Date elapsedDate = new Date(elapsedTime);
 	    
 		logTime(elapsedDate, job, elapsedFormatter);
 		System.out.println("Logged time successfully");
-		
-		//in.close();
 		
 		return;
 	}
@@ -218,9 +214,7 @@ public class StopWatch {
 	private static String verifyJobName(String input, ArrayList<String> jobs) {
 
 		String job;
-		//Scanner in = new Scanner(System.in);
 		
-		//Determine if job was already given and identify job
 		if (!input.contains(" ")) {
 			System.out.println("Enter the name of the job you wish to manage");
 			job = sysIn.nextLine();
@@ -234,7 +228,7 @@ public class StopWatch {
 		//Loop until valid input is given
 		while(!jobs.contains(job) && !job.equals("e")) {
 			System.out.println("Invalid job name: try again, or (e)xit");
-			job = sysIn.nextLine();
+			job = sysIn.nextLine().toLowerCase();
 		}
 		
 		//in.close();
@@ -253,6 +247,7 @@ public class StopWatch {
 			Scanner in = new Scanner(job);
 			
 			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+			formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
 			long timeTotal = 0;
 			
 			while (in.hasNextLine()) {
@@ -264,7 +259,7 @@ public class StopWatch {
 					System.out.println("Invalid time data. Ignoring");
 				}
 				else {
-					long time = Long.parseLong(times[2]);
+					long time = formatter.parse(times[2]).getTime();
 					timeTotal += time;
 				}
 				
@@ -273,11 +268,10 @@ public class StopWatch {
 			in.close();
 			
 			Date total = new Date(timeTotal);
-			formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
 			System.out.println(formatter.format(total));
 			
-		} catch (FileNotFoundException e) {
-
+		} catch (FileNotFoundException | ParseException e) {
+			e.printStackTrace();
 			System.out.println("Failed to add time");
 		}
 	}
