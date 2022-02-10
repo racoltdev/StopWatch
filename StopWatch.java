@@ -1,19 +1,23 @@
-import java.io.File;
-
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Scanner;
 import java.util.TimeZone;
 
-//Simple stopwatch program to clock my work
+import java.util.Scanner;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.io.FileWriter;
+import java.nio.file.StandardOpenOption;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.ParseException;
+
+/**
+ * Simple stopwatch program to track my work
+ * @author racolt: racoltdev@gmail.com
+ */
 public class StopWatch {
 	
 	private static final Scanner sysIn = new Scanner(System.in);
@@ -26,10 +30,14 @@ public class StopWatch {
 		sysIn.close();
 	}
 	
+	/**
+	 * Updates the active jobs in the working directory
+	 * @return	List of active jobs
+	 */
 	public static ArrayList<String> getJobs() {
 		ArrayList<String> jobs = new ArrayList<String>();
 		
-		File jobsDir= new File(System.getProperty("user.dir"));
+		File jobsDir = new File(System.getProperty("user.dir"));
 		
 		File[] files = jobsDir.listFiles((File path) -> path.getName().endsWith(".txt"));
 		for (File file : files) {
@@ -74,6 +82,11 @@ public class StopWatch {
 		}
 	}
 	
+	/**
+	 * Removes given job from the working directory
+	 * @param input : Job name
+	 * @param jobs : List of active jobs
+	 */
 	public static void removeJob(String input, ArrayList<String> jobs) {
 		String job = "";
 		
@@ -90,11 +103,16 @@ public class StopWatch {
 		System.out.println("Removed job successfully");
 	}
 	
+	/**
+	 * Creates a job in the working directory
+	 * @param input : Job name
+	 * @param jobs : List of active jobs
+	 */
 	public static void createJob(String input, ArrayList<String> jobs) {
 		String job = "";
 		
 		if (!input.contains(" ")) {
-			System.out.println("Enter the name of the job you wish to manage");
+			System.out.println("Enter the name of the job you wish to create");
 			job = sysIn.nextLine();
 		}
 		else {
@@ -131,7 +149,6 @@ public class StopWatch {
 		}
 		
 		boolean flag = false;
-		//Scanner in = new Scanner(System.in);
 		System.out.println("Manage Job "+job+": ");
 		
 		while (!flag) {
@@ -159,10 +176,13 @@ public class StopWatch {
 			}
 			
 		}
-		//in.close();
 		return;
 	}
 	
+	/**
+	 * Starts the clock for a given job and awaits stop command
+	 * @param job: File object of job
+	 */
 	public static void runClock(File job) {
 		
 		SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy 'at' HH:mm:ss '\t'");
@@ -190,6 +210,12 @@ public class StopWatch {
 		return;
 	}
 	
+	/**
+	 * Logs time according to given time format in the job file
+	 * @param date : Time to be logged
+	 * @param job : Job file
+	 * @param formatter : time format data will be logged in
+	 */
 	public static void logTime(Date date, File job, SimpleDateFormat formatter) {
 		try {
 	    	FileWriter f = new FileWriter(job, true);
@@ -201,6 +227,10 @@ public class StopWatch {
 	    }
 	}
 	
+	/**
+	 * Clears time for given job
+	 * @param job : Job file
+	 */
 	public static void clearTime(File job) {
 		try {
 			Files.newBufferedWriter(Path.of(job.getPath()), StandardOpenOption.TRUNCATE_EXISTING);
@@ -231,8 +261,6 @@ public class StopWatch {
 			job = sysIn.nextLine().toLowerCase();
 		}
 		
-		//in.close();
-		
 		if (job.equals("e")) {
 			return null;
 		}
@@ -241,6 +269,10 @@ public class StopWatch {
 		}
 	}
 	
+	/**
+	 * Totals all worked time for a given job
+	 * @param job : Job file
+	 */
 	public static void getTotalTime(File job) {
 		
 		try {
