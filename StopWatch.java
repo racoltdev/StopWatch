@@ -149,10 +149,10 @@ public class StopWatch {
 		}
 		
 		boolean flag = false;
-		System.out.println("Manage Job "+job+": ");
+		System.out.println("\nManage Job "+job+": ");
 		
 		while (!flag) {
-			System.out.println("(c)lear time, (t)otal time, (s)tart clock, (e)xit");
+			System.out.println("\n(c)lear time, (t)otal time, (s)tart clock, (p)rint data, (e)xit");
 			input = sysIn.nextLine();
 			char inputChar = input.charAt(0);
 			
@@ -170,6 +170,9 @@ public class StopWatch {
 				else if (inputChar == 's') {
 					runClock(jobFile);
 				}
+				else if (inputChar == 'p') {
+					print(jobFile);
+				}
 				else {
 					System.out.println("Invalid option. Try again");
 				}
@@ -177,6 +180,18 @@ public class StopWatch {
 			
 		}
 		return;
+	}
+	
+	public static void print(File jobFile) {
+		try {
+			Scanner in = new Scanner(jobFile);
+			while(in.hasNextLine()) {
+				System.out.println(in.nextLine());
+			}
+			in.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
