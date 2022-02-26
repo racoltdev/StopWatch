@@ -19,12 +19,13 @@ import java.text.ParseException;
  * @author racolt: racoltdev@gmail.com
  */
 public class StopWatch {
-	
 	private static final Scanner sysIn = new Scanner(System.in);
+	private static final SimpleDateFormat clockFormatter = new SimpleDateFormat("HH:mm:ss");
+
 
 	public static void main(String[] args) {
-
 		ArrayList<String> jobs = getJobs();
+		clockFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
 		generalPrompt(jobs);
 		
 		sysIn.close();
@@ -283,43 +284,69 @@ public class StopWatch {
 			return job;
 		}
 	}
-	
+
+	private static Date isolateClockTime(String str) {
+		Date d = new Date();
+		try {
+			// Isolate the wall-clock part of the timestamp.multiple
+			// SimpleDateFormat would require usage of wildcards and multiple formatters to do this.
+			d = clockFormatter.parse(str.split(" ")[2]);
+		} catch (ParseException e) {
+			System.out.println("Failed to parse string");
+		}
+		return d;
+	}
+
+	private static ArrayList<Date> loadTimestamps(File job) {
+		ArrayList<Date> timestamps = new ArrayList<Date>();
+		try {
+			Scanner in = new Scanner(job);
+
+			int line = 0;
+			while (in.hasNextLine()) {
+				String str = in.nextLine();
+				String[] timestrings = str.split("\t");
+
+				if (timestrings.length < 3) {
+					System.out.println("Invalid time data. TODO: implement repair");
+				} else {
+					Date start = isolateClockTime(timestrings[0]);
+					Date end = isolateClockTime(timestrings[1]);;
+
+					long computedElapsed = end.getTime() - start.getTime();
+					long recordedElapsed = clockFormatter.parse(timestrings[2]).getTime();
+
+					// Compare computed elapsed time against file's elapsed time
+					if (recordedElapsed != computedElapsed) {
+						long difference = Math.abs(computedElapsed - recordedElapsed);
+						System.out.println("Line " + line + " timestamps off by " + clockFormatter.format(difference));
+					}
+					timestamps.add(new Date(computedElapsed));
+				}
+				line++;
+			}
+			in.close();
+		} catch (FileNotFoundException | ParseException e) {
+			e.printStackTrace();
+			System.out.println("Failed to add time");
+		}
+
+		return timestamps;
+	}
+
 	/**
 	 * Totals all worked time for a given job
 	 * @param job : Job file
 	 */
 	public static void getTotalTime(File job) {
-		
-		try {
-			Scanner in = new Scanner(job);
-			
-			SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-			formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
-			long timeTotal = 0;
-			
-			while (in.hasNextLine()) {
-				
-				String str = in.nextLine();
-				String[] times = str.split("\t");
-				
-				if (times.length != 3) {
-					System.out.println("Invalid time data. Ignoring");
-				}
-				else {
-					long time = formatter.parse(times[2]).getTime();
-					timeTotal += time;
-				}
-				
-			}
-			
-			in.close();
-			
-			Date total = new Date(timeTotal);
-			System.out.println(formatter.format(total));
-			
-		} catch (FileNotFoundException | ParseException e) {
-			e.printStackTrace();
-			System.out.println("Failed to add time");
+		ArrayList<Date> timestamps = loadTimestamps(job);
+
+		long timeTotal = 0;
+		for (Date timestamp : timestamps) {
+			timeTotal += timestamp.getTime();
 		}
+
+		Date total = new Date(timeTotal);
+		System.out.println(clockFormatter.format(total));
 	}
 }
