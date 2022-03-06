@@ -61,7 +61,8 @@ public class StopWatch {
 
 			input = sysIn.nextLine().toLowerCase();
 
-			if (input.charAt(0) == 'e') {
+			if (input.equals("")) {}
+			else if (input.charAt(0) == 'e') {
 				System.out.println("Goodbye");
 				sysIn.close();
 				System.exit(0);
@@ -162,7 +163,8 @@ public class StopWatch {
 			}
 			else {
 				File jobFile = new File(job +".txt");
-				if (inputChar == 't') {
+				if (input.equals("")) {}
+				else if (inputChar == 't') {
 					getTotalTime(jobFile);
 				}
 				else if (inputChar == 'c') {
