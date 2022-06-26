@@ -217,7 +217,7 @@ public class StopWatch {
 
 			if (timestamps.length == 1 && !line.equals("")) {
 				readPartialEntry = true;
-				startDate = isolateClockTime(timestamps[0]);
+				startDate = isolateClockTime(timestamps[0], formatter);
 
 				System.out.println("Partial time entry detected, stopping timer and completing entry");
 			}
@@ -299,12 +299,13 @@ public class StopWatch {
 		return job.equals("e") ? null : job;
 	}
 
-	private static Date isolateClockTime(String str) {
+	private static Date isolateClockTime(String str, SimpleDateFormat formatter) {
 		Date d = new Date();
 		try {
 			// Isolate the wall-clock part of the timestamp.multiple
 			// SimpleDateFormat would require usage of wildcards and multiple formatters to do this.
-			d = clockFormatter.parse(str.split(" ")[2]);
+			// Hey bozo, you need to use the timestamp format when parsing existing timestamps
+			d = formatter.parse(str.split(" ")[2]);
 		} catch (ParseException e) {
 			System.out.println("Failed to parse string");
 		}
@@ -322,10 +323,10 @@ public class StopWatch {
 				String[] timestrings = str.split("\t");
 
 				if (timestrings.length < 3) {
-					System.out.println("Invalid time data. TODO: implement repair");
+					System.out.println("Invalid time data. (s)tart to automatically repair");
 				} else {
-					Date start = isolateClockTime(timestrings[0]);
-					Date end = isolateClockTime(timestrings[1]);;
+					Date start = isolateClockTime(timestrings[0], clockFormatter);
+					Date end = isolateClockTime(timestrings[1], clockFormatter);
 
 					long computedElapsed = end.getTime() - start.getTime();
 					long recordedElapsed = clockFormatter.parse(timestrings[2]).getTime();
@@ -333,7 +334,8 @@ public class StopWatch {
 					// Compare computed elapsed time against file's elapsed time
 					if (recordedElapsed != computedElapsed) {
 						long difference = Math.abs(computedElapsed - recordedElapsed);
-						System.out.println("Line " + line + " timestamps off by " + clockFormatter.format(difference));
+						int lineplus = line + 1;
+						System.out.println("Line " + lineplus + " timestamps off by " + clockFormatter.format(difference));
 					}
 					timestamps.add(new Date(computedElapsed));
 				}
