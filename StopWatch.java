@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.time.Duration;
 
 import java.util.Scanner;
 import java.io.File;
@@ -262,6 +263,17 @@ public class StopWatch {
 		}
 	}
 
+	public static void logTime(String formattedDate, File job) {
+		try {
+			FileWriter f = new FileWriter(job, true);
+			f.write(formattedDate);
+			f.close();
+		} catch (Exception e) {
+
+			System.out.println("An error occured. Time not logged successfully");
+		}
+	}
+
 	/**
 	 * Clears time for given job
 	 * @param job : Job file
@@ -351,6 +363,17 @@ public class StopWatch {
 	}
 
 	/**
+	 * Handles hour rollover when greater than 24
+	 */
+	protected static String customFormatter(long timeMillis) {
+		long millisToHours = 3600 * 1000;
+		long hours = timeMillis / millisToHours;
+		System.out.println(hours);
+		SimpleDateFormat totalFormat = new SimpleDateFormat(":mm:ss");
+		return hours + "" + totalFormat.format(timeMillis);
+	}
+
+	/**
 	 * Totals all worked time for a given job
 	 * @param job : Job file
 	 */
@@ -362,7 +385,6 @@ public class StopWatch {
 			timeTotal += timestamp.getTime();
 		}
 
-		Date total = new Date(timeTotal);
-		System.out.println(clockFormatter.format(total));
+		System.out.println(customFormatter(timeTotal));
 	}
 }
