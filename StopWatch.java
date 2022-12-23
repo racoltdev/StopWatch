@@ -215,13 +215,19 @@ public class StopWatch {
 
 			while (in.hasNextLine()) { line = in.nextLine(); }
 			String[] timestamps = line.split("\t");
+			System.out.println(timestamps[0]);
 
 			if (timestamps.length == 1 && !line.equals("")) {
 				readPartialEntry = true;
-				startDate = isolateClockTime(timestamps[0], formatter);
+				try {
+					startDate = formatter.parse(timestamps[0] + "\t");
+				} catch (ParseException e) {
+					System.out.println("Failed to parse string");
+				}
 
-				System.out.println("Partial time entry detected, stopping timer and completing entry");
+				System.out.println("Partial time entry detected, stopping timer and completing entry\nDue to either an extremely dumb mistake by me, or an error with FileWriter or Date Formatter, a newline gets inserted where it shouldn't. This must be manually fixed");
 			}
+			in.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Fuck this, we've already ascertained the file exists.");
 		}
@@ -368,7 +374,6 @@ public class StopWatch {
 	protected static String customFormatter(long timeMillis) {
 		long millisToHours = 3600 * 1000;
 		long hours = timeMillis / millisToHours;
-		System.out.println(hours);
 		SimpleDateFormat totalFormat = new SimpleDateFormat(":mm:ss");
 		return hours + "" + totalFormat.format(timeMillis);
 	}
